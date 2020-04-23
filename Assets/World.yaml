@@ -1,0 +1,180 @@
+%YAML 1.1
+---
+# ECS Debugging file
+Archetypes:
+  Archetype:
+    name: "  - Entity  - WorldTime  - WorldTimeQueue [B]"
+    TypesCount: 3
+    ChunkCount: 1
+    ChunkCapacity: 95
+    properties: []
+  Archetype:
+    name: "  - Entity  - LocalToWorld  - Rotation  - Translation  - RenderBounds  - WorldRenderBounds  - PerInstanceCullingTag  - RenderMesh  - ChunkWorldRenderBounds"
+    TypesCount: 9
+    ChunkCount: 2
+    ChunkCapacity: 107
+    properties: [HasChunkComponents]
+  Archetype:
+    name: "  - Entity  - ChunkWorldRenderBounds  - ChunkHeader"
+    TypesCount: 3
+    ChunkCount: 1
+    ChunkCapacity: 333
+    properties: [SystemStateCleanupNeeded, HasChunkHeader]
+  Archetype:
+    name: "  - Entity  - Dog  - LocalToWorld  - Rotation  - Translation  - RenderBounds  - WorldRenderBounds  - PerInstanceCullingTag  - RenderMesh  - ChunkWorldRenderBounds"
+    TypesCount: 10
+    ChunkCount: 1
+    ChunkCapacity: 106
+    properties: [HasChunkComponents]
+ChunksData:
+  Archetype:
+    name: "  - Entity  - WorldTime  - WorldTimeQueue [B]"
+    ChunkData:
+      Header:
+        metaChunkEntity: {index: 0, version: 0}
+        Capacity: 95
+        Count: 1
+      ComponentDataCollection:
+        ComponentData:
+          info: {Type: Entity, SizeInChunk: 8}
+          Entities:
+            Entity(4:1): {Index: "4", Version: "1"}
+        ComponentData:
+          info: {Type: WorldTime, SizeInChunk: 16}
+          Entities:
+            Entity(4:1): {Time: "Unity.Core.TimeData"}
+        ComponentData:
+          info: {Type: WorldTimeQueue, SizeInChunk: 144}
+          Entities:
+            Entity(4:1):
+  Archetype:
+    name: "  - Entity  - LocalToWorld  - Rotation  - Translation  - RenderBounds  - WorldRenderBounds  - PerInstanceCullingTag  - RenderMesh  - ChunkWorldRenderBounds"
+    ChunkData:
+      Header:
+        metaChunkEntity: {index: 5, version: 1}
+        Capacity: 107
+        Count: 1
+      ComponentDataCollection:
+        ComponentData:
+          info: {Type: Entity, SizeInChunk: 8}
+          Entities:
+            Entity(0:1): {Index: "0", Version: "1"}
+        ComponentData:
+          info: {Type: LocalToWorld, SizeInChunk: 64}
+          Entities:
+            Entity(0:1): {Value: "float4x4(1f, 0f, 0f, -0.2282022f,  0f, 1f, 0f, 4.13f,  0f, 0f, 1f, 1.771858f,  0f, 0f, 0f, 1f)"}
+        ComponentData:
+          info: {Type: Rotation, SizeInChunk: 16}
+          Entities:
+            Entity(0:1): {Value: "quaternion(0f, 0f, 0f, 1f)"}
+        ComponentData:
+          info: {Type: Translation, SizeInChunk: 12}
+          Entities:
+            Entity(0:1): {Value: "float3(-0.2282022f, 4.13f, 1.771858f)"}
+        ComponentData:
+          info: {Type: RenderBounds, SizeInChunk: 24}
+          Entities:
+            Entity(0:1): {Value: "AABB(Center:float3(0f, 0f, 0f), Extents:float3(0.5f, 0.5f, 0.5f)"}
+        ComponentData:
+          info: {Type: WorldRenderBounds, SizeInChunk: 24}
+          Entities:
+            Entity(0:1): {Value: "AABB(Center:float3(-0.2282022f, 4.13f, 1.771858f), Extents:float3(0.5f, 0.5f, 0.5f)"}
+    ChunkData:
+      Header:
+        metaChunkEntity: {index: 6, version: 1}
+        Capacity: 107
+        Count: 1
+      ComponentDataCollection:
+        ComponentData:
+          info: {Type: Entity, SizeInChunk: 8}
+          Entities:
+            Entity(3:1): {Index: "3", Version: "1"}
+        ComponentData:
+          info: {Type: LocalToWorld, SizeInChunk: 64}
+          Entities:
+            Entity(3:1): {Value: "float4x4(1f, 0f, 0f, 6.25f,  0f, 1f, 0f, 0f,  0f, 0f, 1f, 0f,  0f, 0f, 0f, 1f)"}
+        ComponentData:
+          info: {Type: Rotation, SizeInChunk: 16}
+          Entities:
+            Entity(3:1): {Value: "quaternion(0f, 0f, 0f, 1f)"}
+        ComponentData:
+          info: {Type: Translation, SizeInChunk: 12}
+          Entities:
+            Entity(3:1): {Value: "float3(6.25f, 0f, 0f)"}
+        ComponentData:
+          info: {Type: RenderBounds, SizeInChunk: 24}
+          Entities:
+            Entity(3:1): {Value: "AABB(Center:float3(0f, 0f, 0f), Extents:float3(0.5f, 1f, 0.5f)"}
+        ComponentData:
+          info: {Type: WorldRenderBounds, SizeInChunk: 24}
+          Entities:
+            Entity(3:1): {Value: "AABB(Center:float3(6.25f, 0f, 0f), Extents:float3(0.5f, 1f, 0.5f)"}
+  Archetype:
+    name: "  - Entity  - ChunkWorldRenderBounds  - ChunkHeader"
+    ChunkData:
+      Header:
+        metaChunkEntity: {index: 0, version: 0}
+        Capacity: 333
+        Count: 3
+      ComponentDataCollection:
+        ComponentData:
+          info: {Type: Entity, SizeInChunk: 8}
+          Entities:
+            Entity(5:1): {Index: "5", Version: "1"}
+            Entity(6:1): {Index: "6", Version: "1"}
+            Entity(7:1): {Index: "7", Version: "1"}
+        ComponentData:
+          info: {Type: ChunkWorldRenderBounds, SizeInChunk: 24}
+          Entities:
+            Entity(5:1): {Value: "AABB(Center:float3(-0.2282022f, 4.13f, 1.771858f), Extents:float3(0.5f, 0.5f, 0.5f)"}
+            Entity(6:1): {Value: "AABB(Center:float3(6.25f, 0f, 0f), Extents:float3(0.5f, 1f, 0.5f)"}
+            Entity(7:1): {Value: "AABB(Center:float3(-0.3050001f, 1.15f, 0f), Extents:float3(2.445f, 1.81f, 0.5f)"}
+        ComponentData:
+          info: {Type: ChunkHeader, SizeInChunk: 16}
+          Entities:
+            Entity(5:1): {ArchetypeChunk: "Unity.Entities.ArchetypeChunk"}
+            Entity(6:1): {ArchetypeChunk: "Unity.Entities.ArchetypeChunk"}
+            Entity(7:1): {ArchetypeChunk: "Unity.Entities.ArchetypeChunk"}
+  Archetype:
+    name: "  - Entity  - Dog  - LocalToWorld  - Rotation  - Translation  - RenderBounds  - WorldRenderBounds  - PerInstanceCullingTag  - RenderMesh  - ChunkWorldRenderBounds"
+    ChunkData:
+      Header:
+        metaChunkEntity: {index: 7, version: 1}
+        Capacity: 106
+        Count: 2
+      ComponentDataCollection:
+        ComponentData:
+          info: {Type: Entity, SizeInChunk: 8}
+          Entities:
+            Entity(1:1): {Index: "1", Version: "1"}
+            Entity(2:1): {Index: "2", Version: "1"}
+        ComponentData:
+          info: {Type: Dog, SizeInChunk: 1}
+          Entities:
+            Entity(1:1): {GoodGirl: "True"}
+            Entity(2:1): {GoodGirl: "True"}
+        ComponentData:
+          info: {Type: LocalToWorld, SizeInChunk: 64}
+          Entities:
+            Entity(1:1): {Value: "float4x4(1f, 0f, 0f, -2.25f,  0f, 1f, 0f, 2.46f,  0f, 0f, 1f, 0f,  0f, 0f, 0f, 1f)"}
+            Entity(2:1): {Value: "float4x4(1f, 0f, 0f, 1.64f,  0f, 1f, 0f, -0.16f,  0f, 0f, 1f, 0f,  0f, 0f, 0f, 1f)"}
+        ComponentData:
+          info: {Type: Rotation, SizeInChunk: 16}
+          Entities:
+            Entity(1:1): {Value: "quaternion(0f, 0f, 0f, 1f)"}
+            Entity(2:1): {Value: "quaternion(0f, 0f, 0f, 1f)"}
+        ComponentData:
+          info: {Type: Translation, SizeInChunk: 12}
+          Entities:
+            Entity(1:1): {Value: "float3(-2.25f, 2.46f, 0f)"}
+            Entity(2:1): {Value: "float3(1.64f, -0.16f, 0f)"}
+        ComponentData:
+          info: {Type: RenderBounds, SizeInChunk: 24}
+          Entities:
+            Entity(1:1): {Value: "AABB(Center:float3(0f, 0f, 0f), Extents:float3(0.5f, 0.5f, 0.5f)"}
+            Entity(2:1): {Value: "AABB(Center:float3(0f, 0f, 0f), Extents:float3(0.5f, 0.5f, 0.5f)"}
+        ComponentData:
+          info: {Type: WorldRenderBounds, SizeInChunk: 24}
+          Entities:
+            Entity(1:1): {Value: "AABB(Center:float3(-2.25f, 2.46f, 0f), Extents:float3(0.5f, 0.5f, 0.5f)"}
+            Entity(2:1): {Value: "AABB(Center:float3(1.64f, -0.16f, 0f), Extents:float3(0.5f, 0.5f, 0.5f)"}
