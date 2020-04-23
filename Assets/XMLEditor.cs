@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
+using DefaultNamespace;
 using Unity.Entities;
 using Unity.Entities.Serialization;
 using UnityEditor;
@@ -14,7 +15,6 @@ using Object = UnityEngine.Object;
 [CanEditMultipleObjects]
 public class XMLEditor : Editor
 {
-    SerializedProperty lookAtPoint;
     string _FileLocation, _FileName, _FileNameJSON, _FileNameYAML; 
     
     private void OnSceneGUI()
@@ -166,6 +166,17 @@ public class XMLEditor : Editor
                 Instantiate(go, go.transform.position, go.transform.rotation);
             }
         }
+
+        if (GUILayout.Button("new save"))
+        {
+            WorldManagement.Save();
+        }
+
+        if (GUILayout.Button("new Load"))
+        {
+            WorldManagement.Load();
+        }
+
         DrawDefaultInspector();
     }
     
@@ -252,3 +263,5 @@ public class XMLEditor : Editor
         }
     }*/
 }
+
+
