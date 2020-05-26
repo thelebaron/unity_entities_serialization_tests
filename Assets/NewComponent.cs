@@ -24,11 +24,14 @@ public struct MyData
 
 public class NewComponent : MonoBehaviour, IConvertGameObjectToEntity
 {
+    public bool saveOnStart = true;
+    public bool useYaml;
     public MyData myData;
-    
-
     public object[] serialized_objects;
     public List<GameObject> SavedGameObjects;
+    
+    
+    public List<GameObject> HiddenGameObjects;
     
     public void Serialize(XmlWriter _w)
     {
@@ -70,6 +73,23 @@ public class NewComponent : MonoBehaviour, IConvertGameObjectToEntity
     public void Convert(Entity entity, EntityManager dstManager, GameObjectConversionSystem conversionSystem)
     {
         
+    }
+
+
+    private void Start()
+    {
+        
+    }
+
+    private void Update()
+    {
+        HiddenGameObjects = new List<GameObject>();
+        var hidden = FindObjectsOfType<GameObject>();
+        for (int i = 0; i < hidden.Length; i++)
+        {
+            if(hidden[i].hideFlags != HideFlags.None)
+                HiddenGameObjects.Add(hidden[i]);
+        }
     }
 }
 

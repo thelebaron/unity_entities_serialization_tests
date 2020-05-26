@@ -33,6 +33,7 @@ namespace DefaultNamespace
                 QueryReferences.Query(objectReferences);
             
             AssetDatabase.CreateAsset(objectReferences, WorldReferencesLocation);
+            Debug.Log("Saved");
         }
 
         public static void Load()
@@ -52,6 +53,7 @@ namespace DefaultNamespace
             
             World.DefaultGameObjectInjectionWorld.EntityManager.DestroyEntity(World.DefaultGameObjectInjectionWorld.EntityManager.UniversalQuery);
             World.DefaultGameObjectInjectionWorld.EntityManager.MoveEntitiesFrom(world.EntityManager);
+            Debug.Log("Loaded");
         }
         
         /// <summary>

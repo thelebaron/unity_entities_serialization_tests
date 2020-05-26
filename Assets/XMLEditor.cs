@@ -36,12 +36,23 @@ public class XMLEditor : Editor
         EditorGUILayout.PropertyField(lookAtPoint);
         serializedObject.ApplyModifiedProperties();*/
         var script = target as NewComponent;
+        if (script.saveOnStart)
+        {
+            Save();
+            script.saveOnStart = false;
+        }
 
         //timescale = GUILayout.HorizontalScrollbar(timescale, 1.0f, 0.0f, 10.0f);
         GUILayout.HorizontalSlider(1, 0, 1);
-
+        
+        if (GUILayout.Button("Destroy All Entities"))
+        {
+            World.DefaultGameObjectInjectionWorld.EntityManager.DestroyEntity(World.DefaultGameObjectInjectionWorld.EntityManager.UniversalQuery);
+        }
+        
         if (GUILayout.Button("Save"))
         {
+            Save();
             /*
             AssetDatabase.CreateAsset(XmlWriter.Create(), "Assets/MyMaterial.mat");
             //System.IO.File.WriteAllText("C:\blahblah_yourfilepath\yourtextfile.txt", firstnameGUI + ", " + lastnameGUI);
@@ -70,11 +81,13 @@ public class XMLEditor : Editor
                 // Save world
                 using (var writer = new StreamWriter(refFilePathName))
                 {
-                    writer.NewLine = "\n";
                     var em = World.DefaultGameObjectInjectionWorld.EntityManager;
-                    // Save world to yaml
-                    SerializeUtility.SerializeWorldIntoYAML(em, writer, false); // is yaml just debugging?
-                    
+                    if (script.useYaml)
+                    {
+                        // Save world to yaml
+                        writer.NewLine = "\n";
+                        SerializeUtility.SerializeWorldIntoYAML(em, writer, false); // is yaml just debugging?
+                    }
                     // Path for saving world
                     var binaryWorldPath =  _FileLocation + "\\" + "DefaultWorld.world"; // path backslash for system access
                     var binaryWriter = new StreamBinaryWriter(binaryWorldPath);
@@ -84,13 +97,15 @@ public class XMLEditor : Editor
                     var referencedObjectsPath =  "Assets/ReferencedUnityWorldObjects.asset";// path forward slash for asset access
                     SerializeUtilityHybrid.Serialize(em, binaryWriter, out var objectReferences);
                     
-                    QueryReferences.Query(objectReferences);
+                    // For debugging: log all referenced objects which are saved
+                    //QueryReferences.Query(objectReferences);
                     AssetDatabase.CreateAsset(objectReferences, referencedObjectsPath);
                 }
                 
             }
             Debug.Log("Saved");
         }
+        
         if (GUILayout.Button("Load"))
         {
 
@@ -105,21 +120,19 @@ public class XMLEditor : Editor
                 var binaryPath   =  _FileLocation + "\\" + "DefaultWorld.world";
                 
                 // need an empty world to do this
-                var world = new World("SavingWorld");
-                var transaction = world.EntityManager.BeginExclusiveEntityTransaction();
+                var loadingWorld = new World("SavingWorld");
+                var em = loadingWorld.EntityManager;
                 using (var reader = new StreamBinaryReader(binaryPath)) //GetFullPathByName(fileName))
                 {
-                    //reader.NewLine = "\n";
-                    
                     var referencedObjectsPath =  "Assets/ReferencedUnityWorldObjects.asset";// path forward slash for asset access
                     var objectRefAsset = AssetDatabase.LoadAssetAtPath<ReferencedUnityObjects>(referencedObjectsPath);
                     // Load objects as binary file
-                    SerializeUtilityHybrid.Deserialize(world.EntityManager, reader, objectRefAsset);
+                    SerializeUtilityHybrid.Deserialize(em, reader, objectRefAsset);
                 }
                 
                 
                 World.DefaultGameObjectInjectionWorld.EntityManager.DestroyEntity(World.DefaultGameObjectInjectionWorld.EntityManager.UniversalQuery);
-                World.DefaultGameObjectInjectionWorld.EntityManager.MoveEntitiesFrom(world.EntityManager);
+                World.DefaultGameObjectInjectionWorld.EntityManager.MoveEntitiesFrom(em);
             }
             Debug.Log("Loaded");
         }
@@ -157,8 +170,8 @@ public class XMLEditor : Editor
         {
             
             // Load objects from binary file
-            var referencedObjectsPath =  "Assets/BinaryObjectsSaveFile.binary";// path forward slash for asset access
-            var list = BinarySerialization.ReadFromBinaryFile<List<GameObject>>(referencedObjectsPath);
+            var path =  "Assets/BinaryObjectsSaveFile.binary";// path forward slash for asset access
+            var list = BinarySerialization.ReadFromBinaryFile<List<GameObject>>(path);
             Debug.Log("Read all gameobjects from binary file");
             
             foreach (var go in list)
@@ -179,8 +192,13 @@ public class XMLEditor : Editor
 
         DrawDefaultInspector();
     }
-    
-    
+
+    private void Save()
+    {
+        
+    }
+
+
     /*
     // Finally our save and load methods for the file itself 
     void CreateXML() 
