@@ -7,6 +7,8 @@ using System.Xml.Serialization;
 using DefaultNamespace;
 using Unity.Entities;
 using Unity.Entities.Serialization;
+using Unity.Physics.Systems;
+using Unity.Transforms;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -31,10 +33,7 @@ public class XMLEditor : Editor
         var xmlpath = _FileLocation + "\\" + _FileName;
         var jsonpath = _FileLocation + "\\" + _FileNameJSON;
         var yamlpath = _FileLocation + "\\" + _FileNameYAML;
-        /*
-        serializedObject.Update();
-        EditorGUILayout.PropertyField(lookAtPoint);
-        serializedObject.ApplyModifiedProperties();*/
+        
         var script = target as NewComponent;
         if (script.saveOnStart)
         {
@@ -52,15 +51,18 @@ public class XMLEditor : Editor
         
         if (GUILayout.Button("Save"))
         {
+            var x = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<BuildPhysicsWorld>();
+            x.Enabled = false;
             Save();
             /*
+            // note - assetdatabase only works in editor
             AssetDatabase.CreateAsset(XmlWriter.Create(), "Assets/MyMaterial.mat");
             //System.IO.File.WriteAllText("C:\blahblah_yourfilepath\yourtextfile.txt", firstnameGUI + ", " + lastnameGUI);
             // Print the path of the created asset
             //Debug.Log(AssetDatabase.GetAssetPath(material));*/
             
-            XmlSerializer serializer = new XmlSerializer(typeof(MyData));
-            TextWriter    textWriter = new StreamWriter(xmlpath);
+            var serializer = new XmlSerializer(typeof(MyData));
+            var textWriter = new StreamWriter(xmlpath);
             serializer.Serialize(textWriter, script.myData);
             textWriter.Close(); 
             
@@ -69,7 +71,6 @@ public class XMLEditor : Editor
             //XmlWriter xmlWriter = XmlWriter.Create("Assets/test.xml");
             //script.Serialize(xmlWriter);
 
-                
             {
                 //entities
                 //if(World.All == null)
@@ -108,8 +109,6 @@ public class XMLEditor : Editor
         
         if (GUILayout.Button("Load"))
         {
-
-            
             {            
                 if(World.All.Count<1)
                     return;

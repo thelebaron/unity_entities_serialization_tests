@@ -33,7 +33,7 @@ public class DummyMoveSystem : SystemBase
         float time = Time.DeltaTime;
         Entities.ForEach((Entity entity, ref Translation translation, in RandomDirection randomDirection) =>
         {
-            translation.Value += time * randomDirection.Direction * 2;
+            //translation.Value += time * randomDirection.Direction * 2;
             
         }).Schedule();
         
