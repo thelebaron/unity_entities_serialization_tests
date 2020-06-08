@@ -2,23 +2,43 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml.Serialization;
 using DefaultNamespace;
 using Unity.Entities;
 using Unity.Entities.Serialization;
 using Unity.Physics.Systems;
-using Unity.Transforms;
 using UnityEditor;
+using UnityEditor.AddressableAssets.Settings;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using Object = System.Object;
 
 [CustomEditor(typeof(NewComponent))]
 [CanEditMultipleObjects]
 public class XMLEditor : Editor
 {
-    string _FileLocation, _FileName, _FileNameJSON, _FileNameYAML; 
-    
+    string _FileLocation, _FileName, _FileNameJSON, _FileNameYAML;
+    private string jsonpath;
+    private string xmlpath;
+    private string yamlpath;
+    private EntityManager em;
+
+    private void OnEnable()
+    {
+        _FileLocation = Application.dataPath; 
+        _FileName     = "SaveData.xml";
+        _FileNameJSON = "SaveData.json";
+        _FileNameYAML = "World.yaml";
+        xmlpath  = _FileLocation + "\\" + _FileName;
+        jsonpath = _FileLocation + "\\" + _FileNameJSON;
+        yamlpath = _FileLocation + "\\" + _FileNameYAML;
+        if (World.All.Count == 0) 
+            return;
+        
+        em = World.DefaultGameObjectInjectionWorld.EntityManager;
+        
+    }
+
     private void OnSceneGUI()
     {
         var node = target as NewComponent;
@@ -26,14 +46,6 @@ public class XMLEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        _FileLocation = Application.dataPath; 
-        _FileName     = "SaveData.xml";
-        _FileNameJSON = "SaveData.json";
-        _FileNameYAML = "World.yaml";
-        var xmlpath = _FileLocation + "\\" + _FileName;
-        var jsonpath = _FileLocation + "\\" + _FileNameJSON;
-        var yamlpath = _FileLocation + "\\" + _FileNameYAML;
-        
         var script = target as NewComponent;
         if (script.saveOnStart)
         {
@@ -51,89 +63,17 @@ public class XMLEditor : Editor
         
         if (GUILayout.Button("Save"))
         {
-            var x = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<BuildPhysicsWorld>();
-            x.Enabled = false;
-            Save();
-            /*
-            // note - assetdatabase only works in editor
-            AssetDatabase.CreateAsset(XmlWriter.Create(), "Assets/MyMaterial.mat");
-            //System.IO.File.WriteAllText("C:\blahblah_yourfilepath\yourtextfile.txt", firstnameGUI + ", " + lastnameGUI);
-            // Print the path of the created asset
-            //Debug.Log(AssetDatabase.GetAssetPath(material));*/
-            
-            var serializer = new XmlSerializer(typeof(MyData));
-            var textWriter = new StreamWriter(xmlpath);
-            serializer.Serialize(textWriter, script.myData);
-            textWriter.Close(); 
-            
-            var jsondata = JsonUtility.ToJson(script.myData, true);
-            File.WriteAllText(jsonpath, jsondata);
-            //XmlWriter xmlWriter = XmlWriter.Create("Assets/test.xml");
-            //script.Serialize(xmlWriter);
+            DisablePhysicsSystemForSaving();
+            SaveJsonYamlXml(script);
+            SaveData();
 
-            {
-                //entities
-                //if(World.All == null)
-                if(World.All.Count<1)
-                    return;
-                
-                var refFilePathName = @yamlpath;
-            
-                // Save world
-                using (var writer = new StreamWriter(refFilePathName))
-                {
-                    var em = World.DefaultGameObjectInjectionWorld.EntityManager;
-                    if (script.useYaml)
-                    {
-                        // Save world to yaml
-                        writer.NewLine = "\n";
-                        SerializeUtility.SerializeWorldIntoYAML(em, writer, false); // is yaml just debugging?
-                    }
-                    // Path for saving world
-                    var binaryWorldPath =  _FileLocation + "\\" + "DefaultWorld.world"; // path backslash for system access
-                    var binaryWriter = new StreamBinaryWriter(binaryWorldPath);
-                    
-                    // Save whole world
-                    // not hybrid SerializeUtility.SerializeWorld(em, binaryWriter, out var objectReferences);
-                    var referencedObjectsPath =  "Assets/ReferencedUnityWorldObjects.asset";// path forward slash for asset access
-                    SerializeUtilityHybrid.Serialize(em, binaryWriter, out var objectReferences);
-                    
-                    // For debugging: log all referenced objects which are saved
-                    //QueryReferences.Query(objectReferences);
-                    AssetDatabase.CreateAsset(objectReferences, referencedObjectsPath);
-                }
-                
-            }
+
             Debug.Log("Saved");
         }
         
         if (GUILayout.Button("Load"))
         {
-            {            
-                if(World.All.Count<1)
-                    return;
-                //entities
-                var refFilePathName = @yamlpath;
-            
-                // To generate the file we'll test against
-                var binaryPath   =  _FileLocation + "\\" + "DefaultWorld.world";
-                
-                // need an empty world to do this
-                var loadingWorld = new World("SavingWorld");
-                var em = loadingWorld.EntityManager;
-                using (var reader = new StreamBinaryReader(binaryPath)) //GetFullPathByName(fileName))
-                {
-                    var referencedObjectsPath =  "Assets/ReferencedUnityWorldObjects.asset";// path forward slash for asset access
-                    var objectRefAsset = AssetDatabase.LoadAssetAtPath<ReferencedUnityObjects>(referencedObjectsPath);
-                    // Load objects as binary file
-                    SerializeUtilityHybrid.Deserialize(em, reader, objectRefAsset);
-                }
-                
-                
-                World.DefaultGameObjectInjectionWorld.EntityManager.DestroyEntity(World.DefaultGameObjectInjectionWorld.EntityManager.UniversalQuery);
-                World.DefaultGameObjectInjectionWorld.EntityManager.MoveEntitiesFrom(em);
-            }
-            Debug.Log("Loaded");
+            LoadData();
         }
         
         // Save gameobjects to binary file
@@ -192,6 +132,101 @@ public class XMLEditor : Editor
         DrawDefaultInspector();
     }
 
+    private void SaveJsonYamlXml(NewComponent script)
+    {
+        var serializer = new XmlSerializer(typeof(MyData));
+        var textWriter = new StreamWriter(xmlpath);
+        serializer.Serialize(textWriter, script.myData);
+        textWriter.Close();
+        var jsondata = JsonUtility.ToJson(script.myData, true);
+        File.WriteAllText(jsonpath, jsondata);
+        
+        // DOTS Save world
+        if(World.All.Count<1) return;
+        using (var writer = new StreamWriter(yamlpath))
+        {
+            var em = World.DefaultGameObjectInjectionWorld.EntityManager;
+            // Save world to yaml
+            writer.NewLine = "\n";
+            SerializeUtility.SerializeWorldIntoYAML(em, writer, false); // is yaml just debugging?
+        }
+    }
+
+    private static void DisablePhysicsSystemForSaving()
+    {
+        var x = World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<BuildPhysicsWorld>();
+        x.Enabled = false;
+    }
+
+    private void SaveData()
+    {
+        if (!Directory.Exists("Saves"))
+            Directory.CreateDirectory("Saves");
+        
+        var formatter = new BinaryFormatter();
+        var objects = new List<System.Object>();
+        var saveFile = File.Create("Saves/Save.bin");
+        
+        // DOTS Save world
+        if(World.All.Count<1) return;
+        using (var writer = new StreamWriter(yamlpath))
+        {
+            // Path for saving world
+            var binaryWorldPath =  _FileLocation + "\\" + "DefaultWorld.world"; // path backslash for system access
+            var binaryWriter    = new StreamBinaryWriter(binaryWorldPath);
+                    
+            // Save whole world
+            // not hybrid SerializeUtility.SerializeWorld(em, binaryWriter, out var objectReferences);
+            var referencedObjectsPath =  "Assets/ReferencedUnityWorldObjects.asset";// path forward slash for asset access
+            SerializeUtilityHybrid.Serialize(em, binaryWriter, out ReferencedUnityObjects objectReferences);
+            binaryWriter.Dispose();
+            
+            // For debugging: log all referenced objects which are saved QueryReferences.Query(objectReferences);
+            AssetDatabase.CreateAsset(objectReferences, referencedObjectsPath);
+            objects.Add(objectReferences);
+            
+            /*var zx   = GameObject.Find("test");
+            var xm   = zx.GetComponent<MeshFilter>();
+            var m    = xm.sharedMesh;
+            var code = m.GetHashCode();*/
+        }
+        
+        formatter.Serialize(saveFile,objects);
+    }
+
+    private void LoadData()
+    {
+        if(!File.Exists("Saves/Save.bin")) 
+            return;
+        if(World.All.Count<1) 
+            return;
+        
+        var formatter = new BinaryFormatter();
+        var saveFile = File.Open("Saves/Save.bin", FileMode.Open);
+        var deserializedObject = formatter.Deserialize(saveFile);
+        var objects = deserializedObject as List<Object>;
+        var refObjects = objects[0] as ReferencedUnityObjects;
+        
+        // To generate the file we'll test against
+        var binaryPath =  _FileLocation + "\\" + "DefaultWorld.world";
+            
+        // need an empty world to do this
+        var loadingWorld = new World("SavingWorld");
+        var em           = loadingWorld.EntityManager;
+        using (var reader = new StreamBinaryReader(binaryPath)) //GetFullPathByName(fileName))
+        {
+            var referencedObjectsPath =  "Assets/ReferencedUnityWorldObjects.asset";// path forward slash for asset access
+            var objectRefAsset        = AssetDatabase.LoadAssetAtPath<ReferencedUnityObjects>(referencedObjectsPath);
+            // Load objects as binary file
+            SerializeUtilityHybrid.Deserialize(em, reader, refObjects);
+        }
+            
+            
+        World.DefaultGameObjectInjectionWorld.EntityManager.DestroyEntity(World.DefaultGameObjectInjectionWorld.EntityManager.UniversalQuery);
+        World.DefaultGameObjectInjectionWorld.EntityManager.MoveEntitiesFrom(em);
+        
+        Debug.Log("Loaded");
+    }
     private void Save()
     {
         
